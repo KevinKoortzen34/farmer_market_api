@@ -95,3 +95,4 @@ C:\Users\kevin\OneDrive\Desktop\Projects\farmer_market_api\farmer_market_api\obj
 C:\Users\kevin\OneDrive\Desktop\Projects\farmer_market_api\farmer_market_api\obj\Debug\net10.0\farmer_market_api.pdb
 C:\Users\kevin\OneDrive\Desktop\Projects\farmer_market_api\farmer_market_api\obj\Debug\net10.0\farmer_market_api.genruntimeconfig.cache
 C:\Users\kevin\OneDrive\Desktop\Projects\farmer_market_api\farmer_market_api\obj\Debug\net10.0\ref\farmer_market_api.dll
+C:\Users\kevin\OneDrive\Desktop\Projects\farmer_market_api\farmer_market_api\obj\Debug\net10.0\farmer_market_api.sourcelink.json
