@@ -26,6 +26,7 @@ namespace farmer_market_api.Controllers
             return farmers;
         }
 
+        [HttpDelete]
         public List<string> Delete([FromQuery] string name)
         {
             if (farmers.Contains(name))
