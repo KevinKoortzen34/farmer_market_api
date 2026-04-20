@@ -17,44 +17,44 @@ namespace farmer_market_api.Controllers
             new (3, "Zandre", "zandre@example.com", "555-555-5555", "Location 3", "Province 3", 4.8, true)};
 
         [HttpGet]
-        public List<Farmer> GetListOfFarmers()
+        public IActionResult GetListOfFarmers()
         {
-            return farmers;
+            return Ok(farmers);
         }
 
         [HttpPost]
-        public List<Farmer> CreateFarmer([FromBody] Farmer farmer)
+        public IActionResult CreateFarmer([FromBody] Farmer farmer)
         {
             farmers.Add(farmer);
-            return farmers;
+            return Created();
         }
 
         [HttpDelete]
-        public List<Farmer> Delete([FromQuery] int farmerId)
+        public IActionResult Delete([FromQuery] int farmerId)
         {
             var farmer = farmers.FirstOrDefault(f => f.getFarmerId() == farmerId);
             if (farmer != null)
             {
                 farmers.Remove(farmer);
-                return farmers;
+                return Ok(farmer);
             } else
             {
-                return farmers;
+                return NotFound($"Farmer with ID {farmerId} not found.");
             }
         }
 
         [HttpPut]
-        public Farmer UpdateFarmers([FromBody] Farmer updatedFarmer)
+        public IActionResult UpdateFarmer([FromBody] Farmer updatedFarmer)
         {
             var farmer = farmers.FirstOrDefault(f => f.getFarmerId() == updatedFarmer.getFarmerId());
             if(farmer != null)
             {
                 farmer = updatedFarmer;
-                return farmer;
+                return Ok(farmer);
             }
             else
             {
-                return null;
+                return NotFound($"Farmer with ID {updatedFarmer.getFarmerId()} not found.");
             }
         }
     }
