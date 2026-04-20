@@ -15,7 +15,7 @@ namespace farmer_market_api.Controllers
         {
             new (1, 1, "Tomatoes", "Vegetables", 2.5, 100, true, DateTime.Now.AddDays(-10), DateTime.Now.AddDays(-5), "Freshly harvested tomatoes."),
             new (2, 2, "Apples", "Fruits", 3.0, 50, true, DateTime.Now.AddDays(-20), DateTime.Now.AddDays(-15), "Crisp and sweet apples."),
-            new (3, 3, "Carrots", "Vegetables", 1.8, 200, true, DateTime.Now.AddDays(-5), DateTime.Now.AddDays(-2), "Organic carrots from our farm.")
+            new (3, 3, "Carrots", "Vegetables", 1.8, 250, false, DateTime.Now.AddDays(-5), DateTime.Now.AddDays(-2), "Organic carrots from our farm.")
         };
 
         [HttpGet]
@@ -34,7 +34,56 @@ namespace farmer_market_api.Controllers
             }
             else
             {
+                return Ok(produce);
+            }
+        }
+
+        [HttpGet("{id}/summary")]
+        public IActionResult GetProduceListingSummary(int id)
+        {
+            var produce = produceListings.FirstOrDefault(p => p.ListingId == id);
+            if (produce == null)
+            {
+                return NotFound($"Produce listing with ID {id} not found.");
+            }
+            else
+            {
                 return Ok(produce.GetFormattedSummary());
+            }
+        }
+
+        [HttpPost]
+        public IActionResult CreateProduceListing([FromBody] ProduceListing newListing)
+        {
+            produceListings.Add(newListing);
+            return Created($"http://localhost:5079/api/produce/{newListing.ListingId}", produceListings);
+        }
+
+        [HttpGet("available")]
+        public IActionResult GetProduceListingByQty()
+        {
+            var produceWithStock = produceListings.Where(p => p.QuantityKg > 0 && p.IsAvailable).ToList();
+            if (produceWithStock.Count == 0)
+            {
+                return NotFound("No available produce listings found.");
+            }
+            else
+            {
+                return Ok(produceWithStock);
+            }
+        }
+
+        [HttpGet("catagory/{category}")]
+        public IActionResult GetProduceListingByCatagory([FromRoute]string category)
+        {
+            var produceByCategory = produceListings.Where(p => p.Category.Equals(category, StringComparison.OrdinalIgnoreCase)).ToList();
+            if (produceByCategory.Count == 0)
+            {
+                return NotFound($"No produce listings found in category '{category}'.");
+            }
+            else
+            {
+                return Ok(produceByCategory);
             }
         }
     }
