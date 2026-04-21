@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Enums;
 
 namespace farmer_market_api.Models
 {
@@ -10,7 +11,7 @@ namespace farmer_market_api.Models
         public int ListingId { get; set; }
         public int FarmerId { get; set; }
         public string Production { get; set; } = string.Empty;
-        public string Category { get; set; } = string.Empty;
+        public Category Category { get; set; } = Category.Other;
         public double PricePerKg { get; set; } = 0.0;
         public double QuantityKg { get; set; } = 0.0;
         public bool IsAvailable { get; set; } = true;
@@ -18,7 +19,7 @@ namespace farmer_market_api.Models
         public DateTime DateListed { get; set; } = DateTime.Now;
         public string? Description { get; set; }
 
-        public ProduceListing(int listingId, int farmerId, string production, string category, double pricePerKg, double quantityKg, bool isAvailable, DateTime harvestDate, DateTime dateListed, string? description)
+        public ProduceListing(int listingId, int farmerId, string production, Category category, double pricePerKg, double quantityKg, bool isAvailable, DateTime harvestDate, DateTime dateListed, string? description)
         {
             ListingId = listingId;
             FarmerId = farmerId;
