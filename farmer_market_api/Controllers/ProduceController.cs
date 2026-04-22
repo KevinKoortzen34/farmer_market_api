@@ -3,7 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Enums;
+using farmer_market_api.DTOs;
+using farmer_market_api.Exceptions;
 using farmer_market_api.Models;
+using farmer_market_api.repositories;
 using Microsoft.AspNetCore.Mvc;
 
 namespace farmer_market_api.Controllers
@@ -12,37 +15,34 @@ namespace farmer_market_api.Controllers
     [Route("api/[controller]")]
     public class ProduceController : ControllerBase
     {
-        private List<ProduceListing> produceListings = new List<ProduceListing>()
-        {
-            new (1, 1, "Tomatoes", Category.Vegetables, 2.5, 100, true, DateTime.Now.AddDays(-10), DateTime.Now.AddDays(-5), "Freshly harvested tomatoes."),
-            new (2, 2, "Apples", Category.Fruits, 3.0, 50, true, DateTime.Now.AddDays(-20), DateTime.Now.AddDays(-15), "Crisp and sweet apples."),
-            new (3, 3, "Carrots", Category.Vegetables, 1.8, 250, false, DateTime.Now.AddDays(-5), DateTime.Now.AddDays(-2), "Organic carrots from our farm.")
-        };
+        public ProduceRepository produceRepository = new ProduceRepository();
 
         [HttpGet]
         public IActionResult GetProduceListings()
         {
-            return Ok(produceListings);
+            return Ok(produceRepository.GetAllProduceListings());
         }
 
         [HttpGet("{id}")]
         public IActionResult GetProduceListingById(int id)
-        {
-            var produce = produceListings.FirstOrDefault(p => p.ListingId == id);
-            if (produce == null)
+        {   
+            try
             {
-                return NotFound($"Produce listing with ID {id} not found.");
+                return Ok(produceRepository.GetProduceListingById(id)); 
             }
-            else
+            catch (ListingNotFoundException ex)
             {
-                return Ok(produce);
+                return NotFound(ex.Message);
+            } catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
             }
         }
 
         [HttpGet("{id}/summary")]
         public IActionResult GetProduceListingSummary(int id)
         {
-            var produce = produceListings.FirstOrDefault(p => p.ListingId == id);
+            var produce = produceRepository.GetProduceListingById(id);
             if (produce == null)
             {
                 return NotFound($"Produce listing with ID {id} not found.");
@@ -54,30 +54,42 @@ namespace farmer_market_api.Controllers
         }
 
         [HttpPost]
-        public IActionResult CreateProduceListing([FromBody] ProduceListing newListing)
+        public IActionResult CreateProduceListing([FromBody] CreateProduceDTO newListing)
         {
-            produceListings.Add(newListing);
-            return Created($"http://localhost:5079/api/produce/{newListing.ListingId}", produceListings);
+            try
+            {
+                var produce = new ProduceListing
+                {
+                    FarmerId = newListing.FarmerId,
+                    Production = newListing.Production,
+                    Category = newListing.Category,
+                    PricePerKg = newListing.PricePerKg,
+                    QuantityKg = newListing.QuantityKg,
+                    IsAvailable = newListing.IsAvailable,
+                    HarvestDate = newListing.HarvestDate,
+                    DateListed = newListing.DateListed,
+                    Description = newListing.Description
+                };
+
+                produceRepository.AddProduceListing(produce);
+                return CreatedAtAction(nameof(GetProduceListingById), new { id = produce.ListingId }, produce);
+            }
+            catch (InvalidProduceFormatException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpGet("available")]
         public IActionResult GetProduceListingByQty()
         {
-            var produceWithStock = produceListings.Where(p => p.QuantityKg > 0 && p.IsAvailable).ToList();
-            if (produceWithStock.Count == 0)
-            {
-                return NotFound("No available produce listings found.");
-            }
-            else
-            {
-                return Ok(produceWithStock);
-            }
+            return Ok(produceRepository.GetAvailable());
         }
 
-        [HttpGet("catagory/{category}")]
-        public IActionResult GetProduceListingByCatagory([FromRoute]Category category)
+        [HttpGet("category/{category}")]
+        public IActionResult GetProduceListingByCategory([FromRoute]Category category)
         {
-            return Ok(produceListings.Where(p => p.Category == category).ToList());
+            return Ok(produceRepository.GetProduceListingByCategory(category));
         }
     }
 }
