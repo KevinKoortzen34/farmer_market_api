@@ -20,7 +20,7 @@ namespace farmer_market_api.Controllers
         [HttpGet]
         public IActionResult GetProduceListings()
         {
-            return Ok(produceRepository.GetAllProduceListings());
+            return Ok(produceRepository.GetAll());
         }
 
         [HttpGet("{id}")]
@@ -28,7 +28,7 @@ namespace farmer_market_api.Controllers
         {   
             try
             {
-                return Ok(produceRepository.GetProduceListingById(id)); 
+                return Ok(produceRepository.GetByID(id)); 
             }
             catch (ListingNotFoundException ex)
             {
@@ -42,14 +42,14 @@ namespace farmer_market_api.Controllers
         [HttpGet("{id}/summary")]
         public IActionResult GetProduceListingSummary(int id)
         {
-            var produce = produceRepository.GetProduceListingById(id);
-            if (produce == null)
+            try
             {
-                return NotFound($"Produce listing with ID {id} not found.");
-            }
-            else
-            {
+                var produce = produceRepository.GetByID(id);
                 return Ok(produce.GetFormattedSummary());
+            }
+            catch (ListingNotFoundException ex)
+            {
+                return NotFound(ex.Message);
             }
         }
 
@@ -71,7 +71,7 @@ namespace farmer_market_api.Controllers
                     Description = newListing.Description
                 };
 
-                produceRepository.AddProduceListing(produce);
+                produceRepository.Add(produce);
                 return CreatedAtAction(nameof(GetProduceListingById), new { id = produce.ListingId }, produce);
             }
             catch (InvalidProduceFormatException ex)

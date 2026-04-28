@@ -19,52 +19,44 @@ namespace farmer_market_api.Controllers
         [HttpGet]
         public IActionResult GetListOfFarmers()
         {
-            return Ok(farmerRepository.GetAllFarmers());
+            return Ok(farmerRepository.GetAll());
         }
 
         [HttpPost]
         public IActionResult CreateFarmer([FromBody] Farmer farmer)
         {
-            try
-            {
-                var createdFarmer = farmerRepository.CreateFarmer(farmer);
-                return Created($"api/farmer/{createdFarmer.FarmerId}", createdFarmer);
-            }
-            catch (System.Exception)
-            {
-                
-                throw;
-            }
-            
-            
+            var createdFarmer = farmerRepository.Add(farmer);
+            return Created($"api/farmer/{createdFarmer.FarmerId}", createdFarmer);
         }
 
         [HttpDelete]
         public IActionResult Delete([FromQuery] int farmerId)
         {
-            try
+            var farmer = farmerRepository.GetByID(farmerId);
+            if (farmer == null)
             {
-                var deletedFarmer = farmerRepository.DeleteFarmer(farmerId);
-                return NoContent();
+                return NotFound($"Farmer with ID {farmerId} not found.");
             }
-            catch (FarmerNotFoundException ex)
+
+            var deleted = farmerRepository.Delete(farmer);
+            if (!deleted)
             {
-                return NotFound(ex.Message);
+                return NotFound($"Farmer with ID {farmerId} could not be deleted.");
             }
+
+            return NoContent();
         }
 
         [HttpPut]
         public IActionResult UpdateFarmer([FromBody] Farmer updatedFarmer)
         {
-            try
+            var updatedFarmerResult = farmerRepository.Update(updatedFarmer);
+            if (updatedFarmerResult == null)
             {
-                var updatedFarmerResult = farmerRepository.UpdateFarmer(updatedFarmer);
-                return Ok(updatedFarmerResult);
+                return NotFound($"Farmer with ID {updatedFarmer.FarmerId} not found.");
             }
-            catch (FarmerNotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
+
+            return Ok(updatedFarmerResult);
         }
     }
 }
