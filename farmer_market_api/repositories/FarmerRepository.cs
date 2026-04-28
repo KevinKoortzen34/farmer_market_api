@@ -2,24 +2,24 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using farmer_market_api.interfaces;
 using farmer_market_api.Models;
 
 namespace farmer_market_api.repositories
 {
-    public class FarmerRepository
+    public class FarmerRepository : IRepository<Farmer>
     {
         private readonly List<Farmer> farmers = new List<Farmer> { 
             new (1, "Kobus", "kobus@example.com", "123-456-7890", "Location 1", "Province 1", 4.5, true), 
             new (2, "Tyrique", "tyrique@example.com", "098-765-4321", "Location 2", "Province 2", 4.0, true), 
             new (3, "Zandre", "zandre@example.com", "555-555-5555", "Location 3", "Province 3", 4.8, true)};
 
-
-        public List<Farmer> GetAllFarmers()
+        public List<Farmer> GetAll()
         {
             return farmers;
         }
 
-        public Farmer CreateFarmer(Farmer farmer)
+        public Farmer Add(Farmer farmer)
         {
             int newId = farmers.Max(f => f.FarmerId) + 1;
             farmer.FarmerId = newId;
@@ -27,36 +27,29 @@ namespace farmer_market_api.repositories
             return farmer;
         }
 
-        public bool DeleteFarmer(int farmerId)
+        public bool Delete(Farmer farmer)
         {
-            var farmer = farmers.FirstOrDefault(f => f.getFarmerId() == farmerId);
-            if (farmer != null)
+            var farmerToRemove = farmers.FirstOrDefault(f => f.FarmerId == farmer.FarmerId);
+            if (farmerToRemove != null)
             {
-                farmers.Remove(farmer);
+                farmers.Remove(farmerToRemove);
                 return true;
             }
             return false;
         }
 
-        public Farmer GetFarmerById(int id)
+        public Farmer? GetByID(int id)
         {
-            for (int i = 0; i < farmers.Count; i++)
-            {
-                if (farmers[i].FarmerId == id)
-                {
-                    return farmers[i];
-                }
-            }
-            return null;
+            return farmers.FirstOrDefault(f => f.FarmerId == id);
         }
 
-        public Farmer UpdateFarmer(Farmer updatedFarmer)
+        public Farmer? Update(Farmer updatedFarmer)
         {
-            var farmer = farmers.FirstOrDefault(f => f.getFarmerId() == updatedFarmer.getFarmerId());
-            if(farmer != null)
+            var index = farmers.FindIndex(f => f.FarmerId == updatedFarmer.FarmerId);
+            if (index >= 0)
             {
-                farmer = updatedFarmer;
-                return farmer;
+                farmers[index] = updatedFarmer;
+                return updatedFarmer;
             }
             return null;
         }

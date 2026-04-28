@@ -4,11 +4,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using Enums;
 using farmer_market_api.Exceptions;
+using farmer_market_api.interfaces;
 using farmer_market_api.Models;
 
 namespace farmer_market_api.repositories
 {
-    public class ProduceRepository
+    public class ProduceRepository : IRepository<ProduceListing>
     {
         private List<ProduceListing> produceListings = new List<ProduceListing>()
         {
@@ -17,7 +18,7 @@ namespace farmer_market_api.repositories
             new (3, 3, "Carrots", Category.Vegetables, 1.8, 250, false, DateTime.Now.AddDays(-5), DateTime.Now.AddDays(-2), "Organic carrots from our farm.")
         };
 
-        public ProduceListing AddProduceListing(ProduceListing produce)
+        public ProduceListing Add(ProduceListing produce)
         {
 
             if(string.IsNullOrEmpty(produce.Production))
@@ -39,12 +40,12 @@ namespace farmer_market_api.repositories
             return produce;
         }
 
-        public List<ProduceListing> GetAllProduceListings()
+        public List<ProduceListing> GetAll()
         {
             return produceListings;
         }
 
-        public ProduceListing GetProduceListingById(int id)
+        public ProduceListing GetByID(int id)
         {
             for (int i = 0; i < produceListings.Count; i++)
             {
@@ -64,6 +65,28 @@ namespace farmer_market_api.repositories
         public List<ProduceListing> GetAvailable()
         {
             return produceListings.Where(p => p.IsAvailable).ToList();
+        }
+
+        public ProduceListing Update(ProduceListing updatedProduce)
+        {
+            var index = produceListings.FindIndex(p => p.ListingId == updatedProduce.ListingId);
+            if (index >= 0)
+            {
+                produceListings[index] = updatedProduce;
+                return updatedProduce;
+            }
+            throw new ListingNotFoundException($"Produce listing with ID {updatedProduce.ListingId} not found.");
+        } 
+
+        public bool Delete(ProduceListing produce)
+        {
+            var produceToRemove = produceListings.FirstOrDefault(p => p.ListingId == produce.ListingId);
+            if (produceToRemove != null)
+            {
+                produceListings.Remove(produceToRemove);
+                return true;
+            }
+            return false;
         }
     }
 }
